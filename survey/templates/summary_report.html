@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load responseSectionSum %}
+<section>
+    <h2>Summary for {{record.first_name}} {{record.last_name}} </h2>
+</section>
+<section class="bg-white p-3 border-rounded my-5">
+    <h3>Overview</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Competency Area</th>
+                {% for i in ev %}
+                    <th>{{i.evaluator_name}}</th>
+                {% endfor %}
+                <th>Average</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for section in survey.form.formsection_set.all %}
+                <tr class="section-row">
+                    <td>{{section.name}}</td>
+                    {% for i in ev %}
+                        <td data-score='{{ section|func:i.response.fields}}' class="evSectionScore">{{ section|func:i.response.fields}}</td>
+                    {% endfor %}
+                    <td class="average"></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% for section in survey.form.formsection_set.all %}
+    <section class="bg-white p-3 border-rounded my-5">
+        <h3>{{section.name}}</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Questions</th>
+                    {% for i in ev %}
+                        <th>{{i.evaluator_name}}</th>
+                    {% endfor %}
+                    <th>Average</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in section.inputfield_set.all %}
+                    <tr class="section-row">
+                        <td>{{question.label}}</td>
+                        {% for i in ev %}
+                            <td data-score="{{i.response.fields | find_key:question.id}}" class="evSectionScore">{{i.response.fields | find_key:question.id}}</td>
+                        {% endfor %}
+                        <td class="average"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endfor %}
+<section class="bg-white p-3 border-rounded my-5">
+    <h3>Highest ratings</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Question</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in hi_ratings %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{i.0|find_question}}</td>
+                    <td>{{i.1}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+<section class="bg-white p-3 border-rounded my-5">
+    <h3>Lowest ratings</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Question</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in low_ratings %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{i.0|find_question}}</td>
+                    <td>{{i.1}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% if survey.form.inputtextfield_set.all %}
+    <section class="bg-white p-3 border-rounded my-5">
+        <h3>Short answer questions</h3>
+        {% for q in survey.form.inputtextfield_set.all %}
+            <div>
+                <p>{{q.label}}</p>
+                {% for e in ev %}
+                    <p class="ms-3"><span class="text-muted">{{e.evaluator_name}}: </span>{{e.response.id|get_text_response:q.id}}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </section>
+{% endif %}
+<script>
+    let sections = Array.from(document.getElementsByClassName('section-row'))
+    sections.forEach((section)=>{
+        average = section.querySelector('.average')
+        average.innerHTML = section_avg(section)
+    })
+    function section_avg(section){
+        let coll = section.querySelectorAll('.evSectionScore')
+        sum = 0
+        count = coll.length
+        for(let i=0; i<count; i++){
+            sum+=Number(coll[i].dataset.score)
+        }
+        return (sum/count).toFixed(1)
+    }
+</script>
+{% endblock %}

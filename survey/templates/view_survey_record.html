@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 data-test-id="title">{{record.first_name}} {{record.last_name}} for <a href="{% url 'view_survey' survey.id %}"> {{survey.title}} </a></h3>
+<p> {{record.role}} </p>
+<div>
+    <h4>Evaluators</h4>
+    <table id="evaluators" class="table table-striped">
+        <thead >
+            <tr >
+                <th class="bg-bl">Name</th>
+                <th class="bg-bl">Email</th>
+                <th class="bg-bl">Relationship</th>
+                <th class="bg-bl">Responded</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            {% for e in ev %}
+                <tr data-test-id="evaluator">
+                    <td><a class="w-100" href="{{ e.get_absolute_url }}"> {{e.evaluator_name}}</a></td>
+                    <td><a class="w-100" href="{{ e.get_absolute_url }}"> {{e.evaluator_email}}</a></td>
+                    <td><a class="w-100" href="{{ e.get_absolute_url }}"> {{e.evaluator_relationship}} </a></td>
+                    <td><a class="w-100 response-state" href="{{ e.get_absolute_url }}" data-state="{% if e.response %}true{% else %}false{% endif %}">{% if e.response %}Yes{% else %}No{% endif %}</a></td>
+                </tr>
+            {% empty %}
+                <p>No evaluated added to this record yet</p>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<p class="mt-5">
+    <button type="button" class="btn btn-outline-primary" onclick="open_modal()" data-test-id="open-modal-btn">Add evaluator</button>
+    <a href="{{record.get_absolute_url}}" class="btn btn-outline-secondary ms-2" data-test-id="record-link">Go to record page</a>
+    <a href="{% url 'delete_survey_record' survey.id record.id %}" class="btn btn-outline-danger ms-2" data-test-id="remove-record-link">Remove record from survey</a>
+    <a href="{% url 'view_summary' survey.id record.id %}" class="btn btn-outline-success ms-2" id="summary-link" data-test-id="summary-link">View summary report</a><p id="help-text" class="text-muted"></p>
+    <p id="help-text" class="text-muted"></p>
+</p>
+<section>
+    <br/>
+    <div class="modal shade-bg" id="modal">
+        <div class='modal-dialog modal-dialog-centered transparent'>
+            <div class="modal-content">
+                <div class="modal-header justify-content-between">
+                    <h4 class="modal-title">Add evaluator</h4>
+                    <button class="close" onclick="close_modal()" type="button"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form class="" id="form" data-test-id="new-eval-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="text" class="form-control " id="f_name" placeholder="name" name="name" />
+                            <input type="email" class="form-control mt-3" id="l_name" placeholder="email" name="email" />
+                            <input type="text" class="form-control mt-3" id="email" placeholder="Relationship to record" name="rel">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button onclick='submit()' type='button' class="mt-1 btn btn-primary px-3 right">Save</button></div>
+            </div>
+        </div> 
+    </div>
+</section>
+<script>
+    function open_modal(){
+        document.getElementById('modal').style.display = 'block'
+    }
+    function close_modal(){
+        document.getElementById('modal').style.display = 'none'
+    }
+
+
+    async function submit(){
+        var form = document.querySelector('#form')
+        const data = new FormData(form)
+
+        const res = await fetch("{% url 'add_evaluator' survey.id record.id  %}" ,{
+            method: 'POST',
+            body: data,
+            credentials:"same-origin"
+        })
+        const record = await res.json()
+        const r = record[0]
+        console.log({r})
+        const row = document.createElement('tr')
+        row.setAttribute('data-test-id', 'evaluator')
+        row.innerHTML = `
+            <tr>
+                <td><a class="w-100" href="/assessment/${r.pk}"> ${r.fields.evaluator_name}</a></td>
+                <td><a class="w-100" href="/assessment/${r.pk}"> ${r.fields.evaluator_email}</a></td>
+                <td><a class="w-100" href="/assessment/${r.pk}"> ${r.fields.evaluator_relationship} </a></td>
+                <td><a class="w-100" href="/assessment/${r.pk}"> No </a></td>
+            </tr>
+        `
+        document.getElementById('table-body').appendChild(row)
+        form.reset()
+        close_modal()
+    }
+    let summary_link = document.getElementById('summary-link')
+    if(Array.from(document.getElementsByClassName('response-state')).find(el=>el.dataset.state == 'false')){
+        summary_link.href = 'javascript:;'
+        summary_link.classList.add('disabled')
+        document.getElementById('help-text').innerHTML = 'Summary report not available until all assessments are completed'
+    }
+</script>
+{% endblock %}

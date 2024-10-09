@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mw-720">
+    <h2 class="text-center">Create survey</h2>
+    <p class="text-center text-muted">setup your 360degree survey </p>
+    <form method="post" action="" id="form" data-test-id="survey-form">
+        {% csrf_token %}
+        <div class="form-group mt-3">
+            <label for="title">Title</label>
+            <input type="text" class="form-control" id="title" placeholder="Enter survey title" name="title" data-test-id='title'>
+        </div>
+        <p class="mt-5"> Click on one of these forms to use as your questionnaire for the survey</p>
+        <div class="flex gap-3 flex-wrap">
+        {% for f in forms %}
+            <div class="card p-1" onclick="select_form(`{{f.id}}`)" id="{{f.id}}" style="width: 10rem;" data-test-id="form">
+                <div class="card-body">
+                    <h6 class="card-title">{{f.name}}</h6>
+                    <a href="{{f.get_absolute_url}}" class="card-link">view form</a>
+                </div>
+            </div>
+        {% empty %}
+            <p class="mt-5">You have no forms, click <a href="{% url 'form' %}"> here</a> to create a form</p>
+        {% endfor %}
+        </div>
+        <div class="mt-5">
+            <h3>Email template</h3>
+            <p><button type="button" class='btn p-2 border border-rounded me-2' onclick="toggle_email(this)" data-test-id="mail-template-btn"></button><span>edit email template</span></p>
+            <textarea type="text" name="mail-template" class="form-control py-2 px-4" id="email-template" disabled style="height: 15rem;" >
+                {{ email_template }}
+            </textarea>
+        </div>
+    </form>
+    <button type="button" class="btn btn-primary btn-block float-right mt-3" onclick="submit()">Continue</button>
+    <br/>
+</div>
+<script>
+    let cardList = Array.from(document.querySelectorAll('.card'))
+    let form = document.querySelector('#form')
+    let input = document.createElement('input')
+    input.setAttribute('type', 'hidden')
+    input.setAttribute('name', 'form')
+
+    function select_form(id){
+        input.setAttribute('value', id)
+        for(let i = 0; i < cardList.length; i++){
+            if(id == cardList[i].id ){
+                cardList[i].classList.add('card_selected')
+            }else {cardList[i].classList.remove('card_selected')}
+        }
+    }
+
+    function toggle_email(element){
+        element.classList.toggle('btn-primary')
+        email_template = document.getElementById('email-template')       
+        email_template.disabled = !email_template.disabled
+    }
+
+    function submit(){
+        form.appendChild(input)
+        form.submit()
+    }
+
+</script>
+
+{% endblock %}

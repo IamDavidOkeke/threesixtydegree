@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Your Surveys</h1>
+<br/>
+<ul class="p-0">
+    {% for s in surveys %}
+        <li class="card mb-3 p-3" data-test-id="survey">
+            <h3 class="card-title">{{s.title}}</h3>
+            <p class="card-text">created at {{s.created_at}}</p>
+            <p><a class='btn btn-primary' href="{{s.get_absolute_url}}">open</a></p>
+        </li>
+    {% endfor %}
+</ul>
+<a class=" btn btn-outline-primary" href="{% url 'survey' %}">Create new survey</a>
+{% endblock %}

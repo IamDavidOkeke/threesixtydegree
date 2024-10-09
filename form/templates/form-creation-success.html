@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class='mx-auto'>
+    <h1 class='text-center'>Success</h1>
+    <br/>
+    <p class='text-center text-muted'>form sucessfully created</p>
+    <p class='text-center text'><a class="text-center text"  href="{{form.get_absolute_url}}">View form</a></p>
+    <p class='text-center text'><a class="text-center text"  href="{% url 'view_forms' %}">View all forms</a></p>
+    <p class='text-center text'><a class="text-center text"  href="{% url 'survey' %}">Go to survey creation</a></p>
+</div>
+{% endblock %}

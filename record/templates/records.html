@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Your Records</h1>
+<br/>
+<div class="p-0">
+    {% for r in records %}
+        <a class="card mb-3 p-2" href="{% url 'record' r.id %}">
+            <p class="card-text">{{r.first_name}} {{r.first_name}}, {{r.role}}</p>
+        </a>
+    {% endfor %}
+</div>
+<p><a class='btn btn-success' href="{% url 'create_record' %}">Create new record</a></p>
+{% endblock %}

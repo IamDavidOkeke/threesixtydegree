@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content%}
+    <div class="container">
+        <h1 class="text-center">Register</h1>
+        <p class="text-center text-muted">here's how to sign up to your account</p>
+        <form method="post" action="">
+            {% csrf_token %}
+            <div class="row mt-5">
+                <div class="form-group col">
+                    <label for="f_name">First Name</label>
+                    <input type="text" class="form-control py-4" id="f_name" placeholder="First Name" name="first_name" />
+                </div>
+                <div class="form-group col">
+                    <label for="l_name">Last Name</label>
+                    <input type="text" class="form-control py-4" id="l_name" placeholder="last Name" name="last_name" />
+                </div>
+            </div>
+            <div class="form-group mt-3">
+                <label for="email">Email Adress</label>
+                <input type="text" class="form-control py-4" id="email" placeholder="Enter your email address" name="email" />
+            </div>
+            <div class="form-group mt-3">
+                <label for="u_name">Username</label>
+                <input type="text" class="form-control py-4" id="u_name" placeholder="Enter your username" name="username">
+            </div>
+            <div class="form-group mt-3">
+                <label for="password">Password</label>
+                <input type="password" class="form-control py-4" id="password" placeholder="Enter your passowrd" name="password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-3">Continue</button>
+            <p class="text-center text-muted"> Already have an account? <a class="text-primary" href="{% url 'login' %}">Log in</a> </p>
+            </form>
+    </div>
+{% endblock %}

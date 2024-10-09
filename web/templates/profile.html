@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<div>
+    <p>{{ user.first_name}} {{ user.last_name}}</p>
+    <p>{{ user.username}}</p>
+    <p>{{ user.email}}</p>
+</div>
+<section class="mt-5">
+    <h3 id="survey">Surveys</h3>
+    <div class="flex gap-3 flex-wrap">
+        {% for s in user.survey_set.all %}
+            <div class="card p-1" style="width: 12rem;">
+                <div class="card-body">
+                    <h5 class="card-title">{{s.title}}</h5>
+                    <p class="card-text text-muted">{{s.created_at}}</p>
+                    <a href="{{s.get_absolute_url}}" class="btn btn-outline-primary">view survey</a>
+                </div>
+            </div>
+        {% endfor %}
+        <a class="card"  style="width: 12rem;" data-test-id="new-survey-link" href="{% url 'survey' %}">
+            <div class="card-body">
+                <p class="card-text text-muted">Add new survey</p>
+            </div>
+        </a>
+    </div>
+</section>
+<section class="mt-5">
+    <h3> Forms </h3>
+    <div class="flex gap-3 flex-wrap">
+        <div class="flex gap-3 flex-wrap">
+        {% for f in user.form_set.all %}
+            <div class="card p-1" style="width: 12rem;" >
+                <div class="card-body">
+                    <h4 class="card-title">{{f.name}}</h4>
+                    <p class="card-text text-muted">{{f.description}}</p>
+                    <a href="{{f.get_absolute_url}}" class="btn btn-outline-primary">view form</a>
+                </div>
+            </div>
+        {% endfor %}
+        <a class="card" style="width: 12rem;" data-test-id="new-form-link" href="{% url 'form' %}">
+            <div class="card-body">
+                <p class="card-text text-muted">Add new form</p>
+            </div>
+        </a>
+    </div>
+</section>
+<!-- -->
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3 data-test-id="survey-title">{{survey.title}}</h3>
+<p>created at {{survey.created_at}}</p>
+<p>form: <a href="{% url 'view_form' survey.form.id %}" data-test-id="form-name" >{{survey.form.name}}</a></p>
+<table id="records" class="table table-striped">
+    <thead >
+        <tr >
+            <th class="bg-bl">Full name</th>
+            <th class="bg-bl">Email</th>
+            <th class="bg-bl">Role</th>
+        </tr>
+    </thead>
+    <tbody id="table-body">
+        {% for r in survey.record_set.all %}
+            <tr data-test-id="survey-record">
+                <td><a class="w-100" href="{% url 'view_survey_record' survey.id r.id %}"> {{r.first_name}} {{r.last_name}}</a></td>
+                <td><a class="w-100" href="{% url 'view_survey_record' survey.id r.id %}"> {{r.email}}</a></td>
+                <td><a class="w-100" href="{% url 'view_survey_record' survey.id r.id %}"> {{r.role}} </a></td>
+            </tr>
+            {% empty %}
+            <tr id="no-record-paragraph"><td colspan="3"><p>No records added to this survey yet</p></td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<section class="mt-5">
+    <h4>Add record</h4>
+    <div class="">
+        <button  class="btn btn-outline-primary" onclick="show_record_modal()" data-test-id="add-record-btn">Add new record</button>
+        <button  class="btn btn-outline-primary" onclick="show_existing_records()" data-test-id="existing-record-btn">Add from existing</button>
+        <button  class="btn btn-outline-primary" >Add with Excel sheet</button>
+    </div>
+</section>
+<div class="modal shade-bg" id="modal">
+    <div class="modal-dialog modal-dialog-centered transparent">
+        <div class="modal-content px-3">
+            <div class="modal-header justify-content-between">
+                <h4 class="modal-title">Add Record</h4>
+                <button class="close" onclick="close_modal()" type="button"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="record-form" data-test-id="new-record-form">
+                    {% csrf_token %}
+                    <div class="row mt-1">
+                        <div class="form-group col">
+                            <label for="f_name">First Name</label>
+                            <input type="text" class="form-control " id="f_name" placeholder="First Name" name="first_name" />
+                        </div>
+                        <div class="form-group col">
+                            <label for="l_name">Last Name</label>
+                            <input type="text" class="form-control " id="l_name" placeholder="last Name" name="last_name" />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="form-group col">
+                            <label for="f_name">Email</label>
+                            <input type="text" class="form-control " id="f_name" placeholder="Email" name="email" />
+                        </div>
+                        <div class="form-group col">
+                            <label for="l_name">Role</label>
+                            <input type="text" class="form-control " id="l_name" placeholder="Role" name="role" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-block" onclick="submit_record()" data-test-id="submit-nrf">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="existing" class="hidden p-4 border mt-3 bg-white">
+    <div class="modal-header justify-content-between">
+        <p class="modal-title display-6">Add existing record</p>
+        <button class="close" onclick="close_existing_records()" type="button"><span>&times;</span></button>
+    </div>
+    <ul class="list-group mt-4">
+        {% for r in non_survey_records %}
+            <li class="p-1 list-group-item" id="existing-{{r.id}} mt-5" data-test-id="non_survey_records">
+                <div class="row justify-content-between align-items-center">
+                    <span class="col"> {{r.first_name}} {{r.last_name}}</span>
+                    <span class="col"> {{r.email}}</span>
+                    <span class="col"> {{r.role}} </span>
+                    <button class="btn btn-link col" onclick="add_existing_record('{{r.id}}')">Add</button>
+                    <form class="hidden" id="existing-record-form-{{r.id}}">
+                        {%csrf_token%}
+                        <input name="record_id" value="{{r.id}}"/>
+                    </form>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>    
+</div>
+<script>
+    function show_record_modal(){
+        document.getElementById('modal').style.display = 'block'
+    }
+    function close_modal(){
+        document.getElementById('modal').style.display = 'none'
+    }
+    function show_existing_records(){
+        document.getElementById('existing').classList.remove('hidden')
+    }
+    function close_existing_records(){
+        document.getElementById('existing').classList.add('hidden')
+    }
+    async function submit_record(){
+        var recordForm = document.querySelector('#record-form')
+        const data = new FormData(recordForm)
+        const res = await fetch("{% url 'add_record' survey.id %}?type=new" ,{
+            method: 'POST',
+            body: data,
+            credentials:"same-origin"
+        })
+        const record = await res.json()
+        const r = record[0]
+        add_row(r)
+        document.getElementById('modal').style.display = 'none'
+    }
+
+    function add_row(r){
+        const row = createRecord(r)
+        document.getElementById('table-body').appendChild(row)
+        if(document.getElementById('no-record-paragraph')){
+            document.getElementById('no-record-paragraph').remove()
+        }
+    }
+    async function add_existing_record(id){
+        const form = document.getElementById(`existing-record-form-${id}`)
+        const data = new FormData(form)
+        const res = await fetch("{% url 'add_record' survey.id %}?type=existing" ,{
+            method: 'POST',
+            body: data,
+            credentials:"same-origin"
+        })
+        const record = await res.json()
+        const r = record[0]
+        add_row(r)
+        document.getElementById(`existing-${id}`).remove()
+    }
+
+    function createRecord(r){
+        const row = document.createElement('tr')
+        row.setAttribute('data-test-id', 'survey-record')
+        row.innerHTML = `
+        <td><a class='w-100' href='{{survey.id}}/record/${r.pk}'> ${r.fields.first_name} ${r.fields.last_name}</a></td>
+        <td><a class='w-100' href='{{survey.id}}/record/${r.pk}'> ${r.fields.email}</a></td>
+        <td><a class='w-100' href='{{survey.id}}/record/${r.pk}'> ${r.fields.role}</a></td>
+        `
+        return row
+    }
+</script>
+{% endblock content %}

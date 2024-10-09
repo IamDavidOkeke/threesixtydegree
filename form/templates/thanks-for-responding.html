@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load dict_key %}
+{% block content %}
+<h3>Evaluation for {{response.assessment.record.first_name}} {{response.assessment.record.last_name}}</h3>
+<p> by: {{response.assessment.evaluator_name}} </p>
+<p> relationship: {{response.assessment.evaluator_relationship}} </p>
+<form action="" method="post">
+    {% for s in response.form.formsection_set.all %}
+    <section class="form-group p-4 border mt-3">
+        <h3 class="">{{s.name}}</h3>
+        {% for q in s.inputfield_set.all %}
+        <fieldset class="form-group mb-3">
+            <p for="f_name" class="">{{q.label}}</p>
+            <div class='form-check'>
+                <label>{{ response.fields |dict_key:q.id}}<input type="radio" class="form-check-input " checked="checked" disabled name={{q.id}} value='{{ response.fields |dict_key:q.id}}' /></label>
+            </div> 
+        </fieldset>
+        <hr />
+        {% endfor %}
+    </section>
+    {% endfor %}
+    <section>
+        {% for f in response.textfieldresponse_set.all %}
+            <div class="form-group mt-3">
+                <label for="u_name">{{f.question}}</label>
+                <input type="text" class="form-control py-1" name="text-{{f.id}}" value="{{f.answer}}"/>
+            </div>
+        {% endfor %}
+    </section>
+</form>
+{% endblock %}

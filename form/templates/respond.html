@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{form.name}}</h1>
+<br />
+<p>{{form.description}}</p>
+<p>by {{assessment.evaluator_name}}</p>
+<form action="" method="post">
+    {% csrf_token %}
+    {% for s in form.formsection_set.all %}
+        <section class="form-group p-4 border mt-3">
+            <h3 class="">{{s.name}}</h3>
+            {% for q in s.inputfield_set.all %}
+            <fieldset class="form-group mb-5">
+                <p for="f_name" class="mt-4">{{q.label}}</p>
+                <div>
+                    <div class='form-check mt-2'><label>Always<input type="radio" class="form-check-input " name={{q.id}} value='5' /></label>
+                    </div>
+                    <div class='form-check mt-2'><label>Frequently<input type="radio" class="form-check-input " name={{q.id}} value='4' /></label>
+                    </div>
+                    <div class='form-check mt-2'><label>Sometimes<input type="radio" class="form-check-input " name={{q.id}} value='3' /></label>
+                    </div>
+                    <div class='form-check mt-2'><label>Seldom<input type="radio" class="form-check-input " name={{q.id}} value='2' /></label>
+                    </div>
+                    <div class='form-check mt-2'><label>Never<input type="radio" class="form-check-input " name={{q.id}} value='1' /></label></div>
+                </div>
+            </fieldset>
+            <hr />
+            {% endfor %}
+        </section>
+    {% endfor %}
+    <section class="form-group p-4 border mt-3">
+        <h3 class="text-muted"> Short answer section</h3>
+        {% for f in form.inputtextfield_set.all %}
+            <div class="form-group mt-3">
+                <label for="u_name">{{f.label}}</label>
+                <input type="text" class="form-control py-1" name="text-{{f.id}}" />
+            </div>
+        {% endfor %}
+    </section>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-secondary btn-block">Submit form</button>
+    </div>
+</form>
+<br />
+{% endblock %}

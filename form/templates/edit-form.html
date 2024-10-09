@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3> Edit form </h3>
+<p>Add or delete sections and fields</p>
+<form action="{% url 'edit_form' form.id %}" method="post" id="meta-form" data-test-id="meta-form">
+    {%csrf_token%}
+    <h1><input value='{{form.name}}' class="form-control border-0 border-bottom" name="name"/></h1>
+    <br/>
+    <textarea name="description" class="form-control" >{{form.description}}</textarea>
+</form>
+
+<section>
+    {% csrf_token %}
+    {% for s in form.formsection_set.all %}
+        <section class="form-group p-4 border mt-3" data-test-id="section" id="{{s.id}}">
+            <h3 class="">{{s.name}}</h3>
+            <div class="mt-3">
+                <button  onclick="edit_section('{{s.id}}')" class="btn btn-outline-primary btn-block" data-test-id="edit-btn">Edit section</button>
+                <a  href="{% url 'delete_section' s.id %}" class="btn btn-outline-danger btn-block" data-test-id="delete-link">Delete section</a>
+            </div>
+        </section>
+        <div class=" modal shade-bg" id="section-{{s.id}}">
+            <div class="modal-dialog modal-dialog-centered transparent">
+                <form class="modal-content" id="form-{{s.id}}" data-test-id="form-{{s.id}}" action="{% url 'edit_section' s.id %}" method="post">
+                    <div class="modal-header justify-content-between">
+                        {% csrf_token %}
+                        <p class="modal-title display-6">Edit section</p>
+                        <button class="close btn" onclick="close_modal('{{s.id}}')" type="button"><span class="close">&times;</span></button>
+                    </div>
+                    <div class="modal-body" id="section-{{s.id}}-fields">
+                        <input class="border-0 border-bottom form-control" value='{{s.name}}' name="name"  />
+                        {% for q in s.inputfield_set.all %}
+                            <div class="input-group p-2 mb-2" id="{{q.id}}" data-test-id="question">
+                                <input placeholder="Enter field name" name={{q.id}}  type='text' class="form-control" value="{{q.label}}" />
+                                <button type="button" class="btn btn-secondary btn-block input-group-append" onclick='delete_field("{{q.id}}")'>Delete field</button>
+                            </div>
+                        {%endfor%}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-block input-group-append" onclick='add_field("{{s.id}}")'>Add field</button>
+                        <button  type='submit' class="btn btn-success btn-block">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+    <section class="form-group p-4 border mt-3">
+        <h3 class="text-muted"> Short answer section</h3>
+        <div class="mt-3">
+            <button  class="btn btn-outline-primary btn-block" onclick="edit_section('text')">Edit section</button>
+            <button  class="btn btn-outline-danger btn-block">Delete section</button>
+        </div>
+    </section>
+    <div class="mt-3">
+        <button  onclick="edit_section('new')" class="btn btn-outline-primary btn-block" data-test-id="add-section-link">Add section</button>
+        <button  onclick="submit_meta_form()" class="btn btn-success btn-block">Save changes</button>
+    </div>
+
+    <div class=" modal shade-bg" id="section-new">
+        <div class="modal-dialog modal-dialog-centered transparent">
+            <form class="modal-content" id="form-new" action="{% url 'add_section' form.id %}" method="post" data-test-id="add-section-form">
+                <div class="modal-header justify-content-between">
+                    {% csrf_token %}
+                    <p class="modal-title display-6">Add section</p>
+                    <button class="close" onclick="close_modal('new')" type="button"><span class="close">&times;</span></button>
+                </div>
+                <div class="modal-body" id="section-question-fields">
+                    <input class="modal-title border-0 form-control" placeholder="Enter section name" name="name" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-block input-group-append" onclick='add_field("question")'>Add field</button>
+                    <button  type='submit' class="btn btn-success btn-block">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class=" modal shade-bg" id="section-text">
+        <div class="modal-dialog modal-dialog-centered transparent">
+            <form class="modal-content" id="form-text" action="{% url 'edit_text_section' form.id %}" method="post">
+                <div class="modal-header justify-content-between">
+                    {% csrf_token %}
+                    <h4 class="modal-title">Edit section</h4>
+                    <button class="close" onclick="close_modal('text')" type="button"><span class="close">&times;</span></button>
+                </div>
+                <div class="modal-body" id="section-text-fields">
+                    {% for q in form.inputtextfield_set.all %}
+                        <div class="input-group p-2 mb-2" id="{{q.id}}">
+                            <input placeholder="Enter field name" name={{q.id}}  type='text ' class="form-control" value="{{q.label}}"/>
+                            <button type="button" class="btn btn-secondary btn-block input-group-append" onclick='delete_field("{{q.id}}")'>Delete field</button>
+                        </div>
+                    {%endfor%}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-block input-group-append" onclick='add_field("text")'>Add field</button>
+                    <button  type='submit' class="btn btn-success btn-block">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<br />
+<script>
+    let count = 0
+    function edit_section(id){
+        document.getElementById(`section-${id}`).style.display = 'block'
+    }
+
+    function close_modal(id){
+        document.getElementById(`section-${id}`).style.display = 'none'
+    }
+
+    function add_field(id){
+        const field = createField(`question-${count}`)
+        document.getElementById(`section-${id}-fields`).appendChild(field)
+        count++
+    }
+
+    function createField(id){
+            let d = document.createElement('div')
+            d.className = "input-group p-2 mb-2"
+            d.setAttribute('id', id)
+            d.innerHTML = `
+                <input placeholder="Enter field name" name=${id}  type='text ' class="form-control" data-test-id="question"/>
+                <button type="button" class="btn btn-secondary btn-block input-group-append" onclick='delete_field("${id}")'>Delete field</button>
+            `
+            return d
+        }
+    
+    function delete_field(id){
+        document.getElementById(id).remove()
+    }
+
+    function submit_meta_form(){
+        document.getElementById('meta-form').submit()
+    }
+</script>
+{% endblock %}

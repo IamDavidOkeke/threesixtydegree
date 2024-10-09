@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Create new form</h1>
+    <form id="form" method="post" action="" data-test-id="new-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="f_name">Form Name</label>
+            <input type="text" class="form-control " id="f_name" placeholder="Form Name" name="name" />
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="f_description">Form description</label>
+            <textarea type="text" class="form-control pb-4" id="f_description" placeholder="Form description" name="description"></textarea>
+        </div>
+        <div class="mt-4">   
+            <button type="submit" class="btn btn-success btn-block" data-test-id="submit-btn">Save questionnaire</button>
+        </div> 
+    </form>
+    <br/>
+    
+{% endblock %}

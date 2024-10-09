@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ThreeSixtyDegree</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}" />
+        {% load static %}
+        <link rel="stylesheet" type='text/css' href="{% static 'main.css' %}" />
+        <style>
+            body{
+                background-color: rgb(255, 255, 255);
+            }
+            .mw-1280{
+                max-width: 1280px;
+            }
+            .box-1{
+                display: grid;
+                grid-template-columns: 150px repeat(11, 1fr);
+                grid-template-rows: 50px auto 50px;
+                grid-template-areas: 
+                "h h h h h h h h h h h h" 
+                "a m m m m m m m m m m m" 
+                "f f f f f f f f f f f f";
+                gap: 1em;
+            }
+            @media (max-width: 600px) {
+                .box-1{
+                    grid-template-columns: 10px repeat(11, 1fr); 
+                }
+            }
+            header{
+                grid-area: h;
+                padding: 1em;
+                
+            }
+            aside{
+                grid-area: a;
+                padding: 1em;
+                
+            }
+            main{
+                padding: 1.5em;
+                grid-area: m;
+                background-color: rgb(252, 252, 252);
+                box-shadow: 0px 0px 5px 1px rgb(243, 243, 243);
+                border-radius: 10px
+            }
+            footer{
+                grid-area: f;
+                padding: 1em;
+            }
+            .close{
+                border: none;
+                background: none;
+                font-size: 2rem;
+                color: rgb(138, 138, 138);
+            }
+            .shade-bg{
+                background-color: rgba(138, 138, 138, 0.5);
+            }
+            .transparent{
+                background-color: rgba(138, 138, 138, 0);
+            }
+        </style>
+    </head>
+    <body class="">
+        <div class="mx-auto mw-1280 px-3 box-1 min-vh-100">
+            <header class="py-2 pt-3">
+                <section class="flex justify-content-between align-items-center align-content-center mx-auto">
+                        <p class="r-img">hrguard</p>
+                        <button class="desk-none mobile-none display-5 p-0 bg-0 border-0"  onclick="toggleMobileMenu()">&#9776;</button>
+                    <nav class="" >
+                        <ul class="flex list-style-none align-items-center">
+                            <li class="me-5"><a class="black" href= "{% url 'home' %}"> home </a></li>
+                            {% if user.is_authenticated %}
+                                <li class="me-5 "><a class="black" href="{% url 'logout' %}"> logout</a></li>
+                                <li class="me-5 "><a class="black" href="{% url 'profile' %}"> profile</a></li>
+                            {% else %}
+                                <li class="me-5 "><a class="black" href="{% url 'login' %}"> login</a></li>
+                                <li class="me-5 "><a class="black" href="{% url 'register' %}"> register</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </section> 
+                <nav class="pt-5 show" id="mobile-menu" >
+                    <ul class="list-style-none ps-0">
+                        <li  class="mb-5"><a class="black" href='./'> HOME </a></li>
+                        <li class="mb-5 "><a class="black" href='./about.html'></a></li>
+                        <li class="mb-5"><a class="black" href='./contact.html'> CONTACT </a></li>
+                        <li class="mb-5"><a class="black" href='./gallery.html'> GALLERY </a></li>
+                        <li class=""><a class="black" href='./donate.html'> DONATE</a></li>
+                    </ul>
+                </nav>
+            </header>
+
+            <aside>
+                <ul class="list-style-none p-0">
+                {% if user.is_authenticated %}
+                    <li class="mb-3 "><a class="black" data-test-id="profile-link" href="{% url 'profile' %}"> Profile</a></li>
+                    <li class="mb-3 "><a class="black" data-test-id="surveys-link" href="{% url 'view_surveys' %}"> Surveys</a></li>
+                    <li class="mb-3 "><a class="black" data-test-id="forms-link" href="{% url 'view_forms' %}"> Forms</a></li>
+                    <li class="mb-3 "><a class="black" data-test-id="records-link" href="{% url 'records' %}"> Records</a></li>
+                    <li class="mb-3 "><a class="black" data-test-id="logout-link" href="{% url 'logout' %}"> Logout</a></li>
+                {% else %}
+                    <li class="mb-3 "><a class="black" href="{% url 'login' %}"> login</a></li>
+                    <li class="mb-3 "><a class="black" href="{% url 'register' %}"> register</a></li>
+                {% endif %}
+                </ul>
+            </aside>
+            <main class="">
+                {% if message %}
+                    {% for m in messages %}
+                        <div class="alert alert-warning fade show">{{ m }}</div>
+                    {% endfor %}
+                {% endif %}
+                <article>
+                    {% block content %}
+                    {% endblock %}
+                </article>
+            </main>
+            <footer class="text-center mt-auto">
+                Footer
+            </footer>
+        </div>
+       
+    </body>
+</html>

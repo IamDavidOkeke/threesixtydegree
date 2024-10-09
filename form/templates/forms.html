@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Your forms</h1>
+<br/>
+<ul class="p-0">
+    {% for f in forms %}
+        <li class="card mb-3 p-3" data-test-id="forms">
+            <h3 class="card-title">{{f.name}}</h3>
+            <p class="card-text">{{f.description}}</p>
+            <p><a class='btn btn-primary' href="{{f.get_absolute_url}}">open</a></p>
+        </li>
+    {% endfor %}
+</ul>
+<a class=" btn btn-outline-primary" href="{% url 'form' %}" data-test-id="create-link">Create new form</a>
+{% endblock %}
