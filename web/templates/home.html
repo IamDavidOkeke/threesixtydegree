@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content%}
-<h1>Hello Chez</h1>
+<h1>Hello User</h1>
+<div>
+    <a class="btn btn-outline-primary px-3" href="{% url 'login' %}"> login</a>
+    <a class="btn btn-outline-primary" href="{% url 'register' %}"> register</a>
+</div>
 {% endblock %}
